@@ -1,5 +1,7 @@
 package com.fulfilment.application.monolith.warehouses.domain.usecases;
 
+import java.time.LocalDateTime;
+
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.ArchiveWarehouseOperation;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
@@ -16,8 +18,10 @@ public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
 
   @Override
   public void archive(Warehouse warehouse) {
-    // TODO implement this method
-
-    warehouseStore.update(warehouse);
+    // Set the archived timestamp and send to the store (repository)
+    if (warehouse != null) {
+      warehouse.archivedAt = LocalDateTime.now();
+      warehouseStore.update(warehouse);
+    }
   }
 }

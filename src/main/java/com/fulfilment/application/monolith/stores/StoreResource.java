@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Status;
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -28,6 +31,9 @@ import org.jboss.logging.Logger;
 public class StoreResource {
 
   @Inject LegacyStoreManagerGateway legacyStoreManagerGateway;
+
+  // Requirement: Hook into the transaction lifecycle
+  @Inject TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
   private static final Logger LOGGER = Logger.getLogger(StoreResource.class.getName());
 
@@ -55,7 +61,8 @@ public class StoreResource {
 
     store.persist();
 
-    legacyStoreManagerGateway.createStoreOnLegacySystem(store);
+    // Register synchronization to ensure legacy call happens AFTER commit
+    performLegacyAction(() -> legacyStoreManagerGateway.createStoreOnLegacySystem(store));
 
     return Response.ok(store).status(201).build();
   }
@@ -77,7 +84,8 @@ public class StoreResource {
     entity.name = updatedStore.name;
     entity.quantityProductsInStock = updatedStore.quantityProductsInStock;
 
-    legacyStoreManagerGateway.updateStoreOnLegacySystem(updatedStore);
+    // Use entity (the managed object) to ensure legacy gets latest data
+    performLegacyAction(() -> legacyStoreManagerGateway.updateStoreOnLegacySystem(entity));
 
     return entity;
   }
@@ -86,25 +94,22 @@ public class StoreResource {
   @Path("{id}")
   @Transactional
   public Store patch(Long id, Store updatedStore) {
-    if (updatedStore.name == null) {
-      throw new WebApplicationException("Store Name was not set on request.", 422);
-    }
-
     Store entity = Store.findById(id);
 
     if (entity == null) {
       throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
     }
 
-    if (entity.name != null) {
+    if (updatedStore.name != null) {
       entity.name = updatedStore.name;
     }
 
-    if (entity.quantityProductsInStock != 0) {
+    // Checking 0 is tricky if valid stock can be 0, but following your original logic:
+    if (updatedStore.quantityProductsInStock != 0) {
       entity.quantityProductsInStock = updatedStore.quantityProductsInStock;
     }
 
-    legacyStoreManagerGateway.updateStoreOnLegacySystem(updatedStore);
+    performLegacyAction(() -> legacyStoreManagerGateway.updateStoreOnLegacySystem(entity));
 
     return entity;
   }
@@ -121,9 +126,26 @@ public class StoreResource {
     return Response.status(204).build();
   }
 
+  /**
+   * Logic to handle the "Must Have" requirement:
+   * Guarantees the Runnable runs only if the DB transaction succeeds.
+   */
+  private void performLegacyAction(Runnable action) {
+    transactionSynchronizationRegistry.registerInterposedSynchronization(new Synchronization() {
+      @Override
+      public void beforeCompletion() {}
+
+      @Override
+      public void afterCompletion(int status) {
+        if (status == Status.STATUS_COMMITTED) {
+          action.run();
+        }
+      }
+    });
+  }
+
   @Provider
   public static class ErrorMapper implements ExceptionMapper<Exception> {
-
     @Inject ObjectMapper objectMapper;
 
     @Override

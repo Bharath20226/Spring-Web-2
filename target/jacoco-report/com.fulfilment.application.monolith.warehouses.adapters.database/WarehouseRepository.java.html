@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WarehouseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java-code-assignment</a> &gt; <a href="index.source.html" class="el_package">com.fulfilment.application.monolith.warehouses.adapters.database</a> &gt; <span class="el_source">WarehouseRepository.java</span></div><h1>WarehouseRepository.java</h1><pre class="source lang-java linenums">package com.fulfilment.application.monolith.warehouses.adapters.database;
+
+import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
+import java.util.Optional;
+
+@ApplicationScoped
+<span class="nc" id="L11">public class WarehouseRepository implements WarehouseStore, PanacheRepository&lt;DbWarehouse&gt; {</span>
+
+    @Override
+    public List&lt;Warehouse&gt; getAll() {
+<span class="nc" id="L15">        return this.listAll().stream()</span>
+<span class="nc bnc" id="L16" title="All 2 branches missed.">                .filter(dw -&gt; dw.archivedAt == null) // Only active warehouses</span>
+<span class="nc" id="L17">                .map(DbWarehouse::toWarehouse)</span>
+<span class="nc" id="L18">                .toList();</span>
+    }
+
+    @Override
+    public void create(Warehouse warehouse) {
+<span class="nc" id="L23">        DbWarehouse dw = fromDomain(warehouse);</span>
+<span class="nc" id="L24">        this.persist(dw);</span>
+<span class="nc" id="L25">    }</span>
+
+    @Override
+    public void update(Warehouse warehouse) {
+<span class="nc" id="L29">        DbWarehouse existing = this.find(&quot;businessUnitCode&quot;, warehouse.businessUnitCode).firstResult();</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (existing != null) {</span>
+<span class="nc" id="L31">            existing.capacity = warehouse.capacity;</span>
+<span class="nc" id="L32">            existing.stock = warehouse.stock;</span>
+<span class="nc" id="L33">            existing.location = warehouse.location;</span>
+<span class="nc" id="L34">            existing.archivedAt = warehouse.archivedAt;</span>
+            // Hibernate updates this automatically at end of transaction
+        }
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public void remove(Warehouse warehouse) {
+<span class="nc" id="L41">        this.delete(&quot;businessUnitCode&quot;, warehouse.businessUnitCode);</span>
+<span class="nc" id="L42">    }</span>
+
+    @Override
+    public Warehouse findByBusinessUnitCode(String buCode) {
+<span class="nc" id="L46">        return this.find(&quot;businessUnitCode&quot;, buCode)</span>
+<span class="nc" id="L47">                .firstResultOptional()</span>
+<span class="nc" id="L48">                .map(DbWarehouse::toWarehouse)</span>
+<span class="nc" id="L49">                .orElse(null);</span>
+    }
+
+    private DbWarehouse fromDomain(Warehouse w) {
+<span class="nc" id="L53">        DbWarehouse dw = new DbWarehouse();</span>
+<span class="nc" id="L54">        dw.businessUnitCode = w.businessUnitCode;</span>
+<span class="nc" id="L55">        dw.location = w.location;</span>
+<span class="nc" id="L56">        dw.capacity = w.capacity;</span>
+<span class="nc" id="L57">        dw.stock = w.stock;</span>
+<span class="nc" id="L58">        dw.createdAt = w.createdAt;</span>
+<span class="nc" id="L59">        dw.archivedAt = w.archivedAt;</span>
+<span class="nc" id="L60">        return dw;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

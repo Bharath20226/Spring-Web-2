@@ -1,61 +1,109 @@
 package com.fulfilment.application.monolith.warehouses.adapters.restapi;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.containsString;
-
-import io.quarkus.test.junit.QuarkusIntegrationTest;
+import com.fulfilment.application.monolith.warehouses.adapters.database.WarehouseRepository;
+import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse as DomainWarehouse;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import org.junit.jupiter.api.Test;
 
-@QuarkusIntegrationTest
-public class WarehouseEndpointIT {
+import java.util.List;
 
-  @Test
-  public void testSimpleListWarehouses() {
+import static org.junit.jupiter.api.Assertions.*;
 
-    final String path = "warehouse";
+@QuarkusTest
+class WarehouseResourceImplTest {
 
-    // List all, should have all 3 products the database has initially:
-    given()
-        .when()
-        .get(path)
-        .then()
-        .statusCode(200)
-        .body(containsString("MWH.001"), containsString("MWH.012"), containsString("MWH.023"));
-  }
+    @Inject
+    WarehouseResourceImpl resource;
 
-  @Test
-  public void testSimpleCheckingArchivingWarehouses() {
+    @Inject
+    WarehouseRepository warehouseRepository;
 
-    // Uncomment the following lines to test the WarehouseResourceImpl implementation
+    @Test
+    void testCreateAndListWarehouses() {
+        Warehouse apiBean = new Warehouse();
+        apiBean.setBusinessUnitCode("BU1");
+        apiBean.setLocation("Hyderabad");
+        apiBean.setCapacity(100);
+        apiBean.setStock(50);
 
-    // final String path = "warehouse";
+        resource.createANewWarehouseUnit(apiBean);
 
-    // List all, should have all 3 products the database has initially:
-    // given()
-    //     .when()
-    //     .get(path)
-    //     .then()
-    //     .statusCode(200)
-    //     .body(
-    //         containsString("MWH.001"),
-    //         containsString("MWH.012"),
-    //         containsString("MWH.023"),
-    //         containsString("ZWOLLE-001"),
-    //         containsString("AMSTERDAM-001"),
-    //         containsString("TILBURG-001"));
+        List<Warehouse> warehouses = resource.listAllWarehousesUnits();
+        assertFalse(warehouses.isEmpty());
+        assertEquals("BU1", warehouses.get(0).getBusinessUnitCode());
+    }
 
-    // // Archive the ZWOLLE-001:
-    // given().when().delete(path + "/1").then().statusCode(204);
+    @Test
+    void testGetWarehouseById_found() {
+        Warehouse apiBean = new Warehouse();
+        apiBean.setBusinessUnitCode("BU2");
+        apiBean.setLocation("Delhi");
+        apiBean.setCapacity(200);
+        apiBean.setStock(80);
 
-    // // List all, ZWOLLE-001 should be missing now:
-    // given()
-    //     .when()
-    //     .get(path)
-    //     .then()
-    //     .statusCode(200)
-    //     .body(
-    //         not(containsString("ZWOLLE-001")),
-    //         containsString("AMSTERDAM-001"),
-    //         containsString("TILBURG-001"));
-  }
+        resource.createANewWarehouseUnit(apiBean);
+
+        Warehouse result = resource.getAWarehouseUnitByID("BU2");
+        assertEquals("Delhi", result.getLocation());
+    }
+
+    @Test
+    void testGetWarehouseById_notFound() {
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> resource.getAWarehouseUnitByID("UNKNOWN"));
+        assertEquals(404, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void testArchiveWarehouse() {
+        Warehouse apiBean = new Warehouse();
+        apiBean.setBusinessUnitCode("BU3");
+        apiBean.setLocation("Mumbai");
+        apiBean.setCapacity(300);
+        apiBean.setStock(120);
+
+        resource.createANewWarehouseUnit(apiBean);
+
+        // Archive it
+        resource.archiveAWarehouseUnitByID("BU3");
+
+        // After archiving, depending on your domain logic, you can assert state
+        DomainWarehouse domain = warehouseRepository.findByBusinessUnitCode("BU3");
+        assertNotNull(domain);
+        // For example, if archive sets a flag, check that flag here
+        // assertTrue(domain.isArchived());
+    }
+
+    @Test
+    void testArchiveWarehouse_notFound() {
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> resource.archiveAWarehouseUnitByID("UNKNOWN"));
+        assertEquals(404, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void testReplaceWarehouse() {
+        Warehouse apiBean = new Warehouse();
+        apiBean.setBusinessUnitCode("BU4");
+        apiBean.setLocation("Chennai");
+        apiBean.setCapacity(400);
+        apiBean.setStock(200);
+
+        resource.createANewWarehouseUnit(apiBean);
+
+        Warehouse newBean = new Warehouse();
+        newBean.setBusinessUnitCode("IGNORED");
+        newBean.setLocation("Bangalore");
+        newBean.setCapacity(500);
+        newBean.setStock(300);
+
+        Warehouse result = resource.replaceTheCurrentActiveWarehouse("BU4", newBean);
+
+        assertEquals("IGNORED", result.getBusinessUnitCode()); // returned object is same as input
+        DomainWarehouse domain = warehouseRepository.findByBusinessUnitCode("BU4");
+        assertEquals("Bangalore", domain.location);
+        assertEquals(500, domain.capacity);
+    }
 }

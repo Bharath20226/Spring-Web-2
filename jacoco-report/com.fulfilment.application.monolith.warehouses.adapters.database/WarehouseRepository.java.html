@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WarehouseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java-code-assignment</a> &gt; <a href="index.source.html" class="el_package">com.fulfilment.application.monolith.warehouses.adapters.database</a> &gt; <span class="el_source">WarehouseRepository.java</span></div><h1>WarehouseRepository.java</h1><pre class="source lang-java linenums">package com.fulfilment.application.monolith.warehouses.adapters.database;
+
+import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+import java.util.List;
+
+@ApplicationScoped
+<span class="fc" id="L11">public class WarehouseRepository implements WarehouseStore, PanacheRepository&lt;DbWarehouse&gt; {</span>
+
+  @Override
+  public List&lt;Warehouse&gt; getAll() {
+    // Converts all database records found into Domain objects for the Use Cases
+<span class="nc" id="L16">    return this.listAll().stream()</span>
+<span class="nc" id="L17">        .map(DbWarehouse::toWarehouse)</span>
+<span class="nc" id="L18">        .toList();</span>
+  }
+
+  @Override
+  @Transactional // Required for writing to DB
+  public void create(Warehouse warehouse) {
+    // Convert domain model to entity and persist
+<span class="nc" id="L25">    DbWarehouse entity = DbWarehouse.fromWarehouse(warehouse);</span>
+<span class="nc" id="L26">    this.persist(entity);</span>
+<span class="nc" id="L27">  }</span>
+
+  @Override
+  @Transactional // Required for updating DB
+  public void update(Warehouse warehouse) {
+    // 1. Find the existing entity in the DB using the unique business code
+<span class="nc" id="L33">    DbWarehouse existing = find(&quot;businessUnitCode&quot;, warehouse.businessUnitCode).firstResult();</span>
+    
+<span class="nc bnc" id="L35" title="All 2 branches missed.">    if (existing != null) {</span>
+      // 2. Update the fields. Hibernate will automatically save these changes 
+      // at the end of the method because of @Transactional.
+<span class="nc" id="L38">      existing.location = warehouse.location;</span>
+<span class="nc" id="L39">      existing.capacity = warehouse.capacity;</span>
+<span class="nc" id="L40">      existing.stock = warehouse.stock;</span>
+<span class="nc" id="L41">      existing.archivedAt = warehouse.archivedAt;</span>
+    }
+<span class="nc" id="L43">  }</span>
+
+  @Override
+  @Transactional // Required for deleting from DB
+  public void remove(Warehouse warehouse) {
+    // Delete the record matching the business unit code
+<span class="nc" id="L49">    delete(&quot;businessUnitCode&quot;, warehouse.businessUnitCode);</span>
+<span class="nc" id="L50">  }</span>
+
+  @Override
+  public Warehouse findByBusinessUnitCode(String buCode) {
+    // Search for a single warehouse by its code
+<span class="nc" id="L55">    DbWarehouse entity = find(&quot;businessUnitCode&quot;, buCode).firstResult();</span>
+    
+    // Return null if not found, or the Domain model if it exists
+<span class="nc bnc" id="L58" title="All 2 branches missed.">    return entity != null ? entity.toWarehouse() : null;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
