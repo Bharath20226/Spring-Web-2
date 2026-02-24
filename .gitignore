@@ -1,0 +1,31 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+.project
+.classpath
+.settings/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build
+bin/
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+*.class
+*.log
+
+# Local
+local.properties
