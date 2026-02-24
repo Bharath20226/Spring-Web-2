@@ -11,6 +11,7 @@ public class ReplaceWarehouseUseCase implements ReplaceWarehouseOperation {
 
   private final WarehouseStore warehouseStore;
 
+  @jakarta.inject.Inject
   public ReplaceWarehouseUseCase(WarehouseStore warehouseStore) {
     this.warehouseStore = warehouseStore;
   }

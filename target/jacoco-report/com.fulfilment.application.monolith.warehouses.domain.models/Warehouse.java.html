@@ -2,7 +2,8 @@
 
 import java.time.LocalDateTime;
 
-<span class="nc" id="L5">public class Warehouse {</span>
+
+<span class="fc" id="L6">public class Warehouse {</span>
 
   // unique identifier
   public String businessUnitCode;
@@ -16,5 +17,57 @@ import java.time.LocalDateTime;
   public LocalDateTime createdAt;
 
   public LocalDateTime archivedAt;
+
+  public String getBusinessUnitCode() {
+<span class="nc" id="L22">	return businessUnitCode;</span>
+  }
+
+  public void setBusinessUnitCode(String businessUnitCode) {
+<span class="nc" id="L26">	this.businessUnitCode = businessUnitCode;</span>
+<span class="nc" id="L27">  }</span>
+
+  public String getLocation() {
+<span class="nc" id="L30">	return location;</span>
+  }
+
+  public void setLocation(String location) {
+<span class="nc" id="L34">	this.location = location;</span>
+<span class="nc" id="L35">  }</span>
+
+  public Integer getCapacity() {
+<span class="nc" id="L38">	return capacity;</span>
+  }
+
+  public void setCapacity(Integer capacity) {
+<span class="nc" id="L42">	this.capacity = capacity;</span>
+<span class="nc" id="L43">  }</span>
+
+  public Integer getStock() {
+<span class="nc" id="L46">	return stock;</span>
+  }
+
+  public void setStock(Integer stock) {
+<span class="nc" id="L50">	this.stock = stock;</span>
+<span class="nc" id="L51">  }</span>
+
+  public LocalDateTime getCreatedAt() {
+<span class="nc" id="L54">	return createdAt;</span>
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L58">	this.createdAt = createdAt;</span>
+<span class="nc" id="L59">  }</span>
+
+  public LocalDateTime getArchivedAt() {
+<span class="nc" id="L62">	return archivedAt;</span>
+  }
+
+  public void setArchivedAt(LocalDateTime archivedAt) {
+<span class="nc" id="L66">	this.archivedAt = archivedAt;</span>
+<span class="nc" id="L67">  }</span>
+  
+  
 }
+
+
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

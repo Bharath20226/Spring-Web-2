@@ -24,15 +24,15 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 @Produces(&quot;application/json&quot;)
 @Consumes(&quot;application/json&quot;)
-<span class="nc" id="L27">public class ProductResource {</span>
+<span class="fc" id="L27">public class ProductResource {</span>
 
   @Inject ProductRepository productRepository;
 
-<span class="nc" id="L31">  private static final Logger LOGGER = Logger.getLogger(ProductResource.class.getName());</span>
+<span class="fc" id="L31">  private static final Logger LOGGER = Logger.getLogger(ProductResource.class.getName());</span>
 
   @GET
   public List&lt;Product&gt; get() {
-<span class="nc" id="L35">    return productRepository.listAll(Sort.by(&quot;name&quot;));</span>
+<span class="fc" id="L35">    return productRepository.listAll(Sort.by(&quot;name&quot;));</span>
   }
 
   @GET
@@ -84,12 +84,12 @@ import org.jboss.logging.Logger;
   @Path(&quot;{id}&quot;)
   @Transactional
   public Response delete(Long id) {
-<span class="nc" id="L87">    Product entity = productRepository.findById(id);</span>
-<span class="nc bnc" id="L88" title="All 2 branches missed.">    if (entity == null) {</span>
+<span class="fc" id="L87">    Product entity = productRepository.findById(id);</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">    if (entity == null) {</span>
 <span class="nc" id="L89">      throw new WebApplicationException(&quot;Product with id of &quot; + id + &quot; does not exist.&quot;, 404);</span>
     }
-<span class="nc" id="L91">    productRepository.delete(entity);</span>
-<span class="nc" id="L92">    return Response.status(204).build();</span>
+<span class="fc" id="L91">    productRepository.delete(entity);</span>
+<span class="fc" id="L92">    return Response.status(204).build();</span>
   }
 
   @Provider

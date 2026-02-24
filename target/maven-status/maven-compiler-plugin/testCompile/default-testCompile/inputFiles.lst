@@ -1,6 +1,11 @@
-C:\Users\SEKHAR CHANDU\Desktop\Ikea_Assignment\java-assignment-20260223T040557Z-1-001\java-assignment\src\test\java\com\fulfilment\application\monolith\location\LocationGatewayTest.java
-C:\Users\SEKHAR CHANDU\Desktop\Ikea_Assignment\java-assignment-20260223T040557Z-1-001\java-assignment\src\test\java\com\fulfilment\application\monolith\warehouses\domain\usecases\CreateWarehouseUseCaseTest.java
-C:\Users\SEKHAR CHANDU\Desktop\Ikea_Assignment\java-assignment-20260223T040557Z-1-001\java-assignment\src\test\java\com\fulfilment\application\monolith\warehouses\domain\usecases\ArchiveWarehouseUseCaseTest.java
-C:\Users\SEKHAR CHANDU\Desktop\Ikea_Assignment\java-assignment-20260223T040557Z-1-001\java-assignment\src\test\java\com\fulfilment\application\monolith\warehouses\domain\usecases\ReplaceWarehouseUseCaseTest.java
-C:\Users\SEKHAR CHANDU\Desktop\Ikea_Assignment\java-assignment-20260223T040557Z-1-001\java-assignment\src\test\java\com\fulfilment\application\monolith\warehouses\adapters\restapi\WarehouseEndpointIT.java
-C:\Users\SEKHAR CHANDU\Desktop\Ikea_Assignment\java-assignment-20260223T040557Z-1-001\java-assignment\src\test\java\com\fulfilment\application\monolith\products\ProductEndpointTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\warehouses\adapters\database\WarehouseRepositoryTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\warehouses\domain\usecases\CreateWarehouseUseCaseTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\warehouses\domain\usecases\ReplaceWarehouseUseCaseTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\stores\StoreResourceIT.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\stores\StoreResourceTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\location\LocationGatewayTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\products\ProductEndpointTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\warehouses\adapters\restapi\WarehouseEndpointIT.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\warehouses\domain\usecases\ArchiveWarehouseUseCaseTest.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\products\ProductResourceIT.java
+C:\Users\HOME\OneDrive\Desktop\Bharath_folder\Ikea_Assignment\Spring-Web-2\src\test\java\com\fulfilment\application\monolith\stores\StoreResourceErrorMapperTest.java

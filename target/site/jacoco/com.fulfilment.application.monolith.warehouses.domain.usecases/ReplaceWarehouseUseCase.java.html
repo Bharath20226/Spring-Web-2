@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReplaceWarehouseUseCase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java-code-assignment</a> &gt; <a href="index.source.html" class="el_package">com.fulfilment.application.monolith.warehouses.domain.usecases</a> &gt; <span class="el_source">ReplaceWarehouseUseCase.java</span></div><h1>ReplaceWarehouseUseCase.java</h1><pre class="source lang-java linenums">package com.fulfilment.application.monolith.warehouses.domain.usecases;
+
+import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.ports.ReplaceWarehouseOperation;
+import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.WebApplicationException;
+
+@ApplicationScoped
+public class ReplaceWarehouseUseCase implements ReplaceWarehouseOperation {
+
+  private final WarehouseStore warehouseStore;
+
+  @jakarta.inject.Inject
+<span class="fc" id="L15">  public ReplaceWarehouseUseCase(WarehouseStore warehouseStore) {</span>
+<span class="fc" id="L16">    this.warehouseStore = warehouseStore;</span>
+<span class="fc" id="L17">  }</span>
+
+  @Override
+  public void replace(Warehouse newWarehouse) {
+<span class="fc" id="L21">    var oldWarehouse = warehouseStore.findByBusinessUnitCode(newWarehouse.businessUnitCode);</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">    if (oldWarehouse == null) {</span>
+<span class="fc" id="L23">        throw new WebApplicationException(&quot;Warehouse to replace not found&quot;, 404);</span>
+    }
+
+    // Validation: Capacity Accommodation
+<span class="fc bfc" id="L27" title="All 2 branches covered.">    if (newWarehouse.capacity &lt; oldWarehouse.stock) {</span>
+<span class="fc" id="L28">        throw new WebApplicationException(&quot;New capacity cannot accommodate existing stock&quot;, 400);</span>
+    }
+    
+    // Validation: Stock Matching
+<span class="fc bfc" id="L32" title="All 2 branches covered.">    if (!newWarehouse.stock.equals(oldWarehouse.stock)) {</span>
+<span class="fc" id="L33">        throw new WebApplicationException(&quot;Stock must match the previous warehouse stock&quot;, 400);</span>
+    }
+
+    // New warehouse should not be archived
+<span class="fc" id="L37">    newWarehouse.archivedAt = null;</span>
+<span class="fc" id="L38">    warehouseStore.update(newWarehouse);</span>
+<span class="fc" id="L39">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

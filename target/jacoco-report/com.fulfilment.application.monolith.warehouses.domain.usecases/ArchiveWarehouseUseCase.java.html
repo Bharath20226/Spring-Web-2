@@ -12,17 +12,18 @@ public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
 
   private final WarehouseStore warehouseStore;
 
-<span class="nc" id="L15">  public ArchiveWarehouseUseCase(WarehouseStore warehouseStore) {</span>
-<span class="nc" id="L16">    this.warehouseStore = warehouseStore;</span>
-<span class="nc" id="L17">  }</span>
+  @jakarta.inject.Inject
+<span class="nc" id="L16">  public ArchiveWarehouseUseCase(WarehouseStore warehouseStore) {</span>
+<span class="nc" id="L17">    this.warehouseStore = warehouseStore;</span>
+<span class="nc" id="L18">  }</span>
 
   @Override
   public void archive(Warehouse warehouse) {
     // Set the archived timestamp and send to the store (repository)
-<span class="nc bnc" id="L22" title="All 2 branches missed.">    if (warehouse != null) {</span>
-<span class="nc" id="L23">      warehouse.archivedAt = LocalDateTime.now();</span>
-<span class="nc" id="L24">      warehouseStore.update(warehouse);</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">    if (warehouse != null) {</span>
+<span class="nc" id="L24">      warehouse.archivedAt = LocalDateTime.now();</span>
+<span class="nc" id="L25">      warehouseStore.update(warehouse);</span>
     }
-<span class="nc" id="L26">  }</span>
+<span class="nc" id="L27">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

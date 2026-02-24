@@ -1,0 +1,364 @@
+# ====================================================
+# WAREHOUSE REST API TESTING - CODE_ASSIGNMENT TASKS
+# ====================================================
+# BASE URL: http://localhost:8080
+# Ensure Quarkus dev server is running: ./mvnw.cmd quarkus:dev
+# ====================================================
+
+### ============================================
+### TASK 1: LOCATION VALIDATION (Implicit Testing)
+### ============================================
+### Task 1: LocationGateway.resolveByIdentifier() - Seeded Locations
+### Valid Locations (case-insensitive):
+### ZWOLLE-001, ZWOLLE-002
+### AMSTERDAM-001, AMSTERDAM-002  
+### TILBURG-001, HELMOND-001
+### EINDHOVEN-001, VETSBY-001
+###
+### Status Codes:
+### 201 Created - Location is valid
+### 400 Bad Request - Invalid location
+### ============================================
+
+### TEST 1.1: Create Warehouse with VALID location
+### EXPECTED: 200 OK
+### Location used: AMSTERDAM-002 (max 3 warehouses, capacity 75)
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-VALID-LOC",
+  "location": "AMSTERDAM-002",
+  "capacity": 50,
+  "stock": 10
+}
+
+### TEST 1.2: Create Warehouse with INVALID location
+### EXPECTED: 400 Bad Request
+### Location "HYDERABAD" does not exist in LocationGateway
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-INVALID-LOC",
+  "location": "HYDERABAD",
+  "capacity": 50,
+  "stock": 10
+}
+
+### TEST 1.3: Create Warehouse with NULL location
+### EXPECTED: 400 Bad Request
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-NULL-LOC",
+  "location": null,
+  "capacity": 50,
+  "stock": 10
+}
+
+
+### ============================================
+### TASK 2: STORE (Transaction-Safe Legacy Sync)
+### ============================================
+### Test Store CRUD operations
+### The StoreResource.performLegacyAction() method ensures
+### LegacyStoreManagerGateway is called ONLY after DB commit
+### Uses: TransactionSynchronizationRegistry + Status.STATUS_COMMITTED
+### 
+### Pre-existing Stores in DB (from import.sql):
+### ID 1: TONSTAD, quantity 10
+### ID 2: KALLAX, quantity 5  
+### ID 3: BESTÅ, quantity 3
+### ============================================
+
+### TEST 2.1: LIST all Stores
+### EXPECTED: 200 OK
+### Returns: [TONSTAD, KALLAX, BESTÅ, ...]
+GET http://localhost:8080/store
+Accept: application/json
+
+### TEST 2.2: GET specific Store (ID=1)
+### EXPECTED: 200 OK
+### Returns: Store with id 1 (TONSTAD)
+GET http://localhost:8080/store/1
+Accept: application/json
+
+### TEST 2.3: CREATE new Store (Legacy Sync happens AFTER commit)
+### EXPECTED: 201 Created
+### Response: Store object with generated ID
+### NOTE: Legacy system sync happens after DB transaction commits
+POST http://localhost:8080/store
+Content-Type: application/json
+
+{
+  "name": "NEW-STORE",
+  "quantityProductsInStock": 20
+}
+
+### TEST 2.4: UPDATE Store by ID (Legacy Sync happens AFTER commit)
+### EXPECTED: 200 OK
+### Store name changed to "UPDATED-TONSTAD"
+### NOTE: Legacy sync guarantees DB update before legacy call
+PUT http://localhost:8080/store/1
+Content-Type: application/json
+
+{
+  "name": "UPDATED-TONSTAD",
+  "quantityProductsInStock": 15
+}
+
+### TEST 2.5: PATCH Store by ID (Partial Update)
+### EXPECTED: 200 OK
+### Only updates the name field
+PATCH http://localhost:8080/store/2
+Content-Type: application/json
+
+{
+  "name": "PATCHED-KALLAX"
+}
+
+### TEST 2.6: UPDATE non-existent Store
+### EXPECTED: 404 Not Found
+PUT http://localhost:8080/store/9999
+Content-Type: application/json
+
+{
+  "name": "GHOST-STORE",
+  "quantityProductsInStock": 50
+}
+
+### TEST 2.7: DELETE Store by ID
+### EXPECTED: 204 No Content
+DELETE http://localhost:8080/store/3
+
+
+### ============================================
+### TASK 3: WAREHOUSE CRUD Operations
+### ============================================
+### Three sub-tasks:
+### 3a. CREATE: Business Unit uniqueness, Location valid, 
+###     Max warehouses per location, Capacity ≤ location.maxCapacity,
+###     Stock ≤ capacity, Sets createdAt timestamp
+### 3b. REPLACE: Warehouse exists, New capacity ≥ old stock,
+###     Stock matches old warehouse
+### 3c. ARCHIVE: Soft-delete with archivedAt timestamp
+###
+### Available Locations for testing:
+### ZWOLLE-001 (max 1, capacity 40)
+### ZWOLLE-002 (max 2, capacity 50)
+### AMSTERDAM-001 (max 5, capacity 100)
+### AMSTERDAM-002 (max 3, capacity 75)
+### TILBURG-001 (max 1, capacity 40)
+### HELMOND-001 (max 1, capacity 45)
+### EINDHOVEN-001 (max 2, capacity 70)
+### VETSBY-001 (max 1, capacity 90)
+### ============================================
+
+### ---- TASK 3a: CREATE Warehouse Tests ----
+
+### TEST 3a.1: CREATE Warehouse - SUCCESS
+### EXPECTED: 200 OK
+### Creates WH-CREATE-001 at AMSTERDAM-002
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-CREATE-001",
+  "location": "AMSTERDAM-002",
+  "capacity": 50,
+  "stock": 10
+}
+
+### TEST 3a.2: CREATE Warehouse - DUPLICATE Business Unit Code
+### EXPECTED: 409 Conflict
+### Business Unit Code already exists (from TEST 3a.1)
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-CREATE-001",
+  "location": "ZWOLLE-002",
+  "capacity": 40,
+  "stock": 5
+}
+
+### TEST 3a.3: CREATE Warehouse - INVALID Location
+### EXPECTED: 400 Bad Request
+### Location "INVALID-CITY" doesn't exist
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-CREATE-002",
+  "location": "INVALID-CITY",
+  "capacity": 50,
+  "stock": 10
+}
+
+### TEST 3a.4: CREATE Warehouse - Capacity exceeds location.maxCapacity
+### EXPECTED: 400 Bad Request
+### AMSTERDAM-002 has maxCapacity 75, trying 80
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-CREATE-003",
+  "location": "AMSTERDAM-002",
+  "capacity": 80,
+  "stock": 10
+}
+
+### TEST 3a.5: CREATE Warehouse - Stock exceeds capacity
+### EXPECTED: 400 Bad Request
+### Stock 60 > Capacity 50
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-CREATE-004",
+  "location": "AMSTERDAM-002",
+  "capacity": 50,
+  "stock": 60
+}
+
+### TEST 3a.6: CREATE Warehouse - Exceeds max warehouses at location
+### EXPECTED: 400 Bad Request
+### TILBURG-001 allows max 1 warehouse (already has 1)
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-CREATE-005",
+  "location": "TILBURG-001",
+  "capacity": 40,
+  "stock": 5
+}
+
+### TEST 3a.7: CREATE Warehouse - All validations pass
+### EXPECTED: 200 OK
+### Valid location, BU code, capacity, stock
+POST http://localhost:8080/warehouse
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-ALL-VALID",
+  "location": "EINDHOVEN-001",
+  "capacity": 60,
+  "stock": 20
+}
+
+### ---- TASK 3b: RETRIEVE Warehouse Tests ----
+
+### TEST 3b.1: LIST all Warehouses
+### EXPECTED: 200 OK
+### Returns list of all non-archived warehouses
+GET http://localhost:8080/warehouse
+Accept: application/json
+
+### TEST 3b.2: GET Warehouse by Business Unit Code
+### EXPECTED: 200 OK
+### Returns WH-CREATE-001
+GET http://localhost:8080/warehouse/WH-CREATE-001
+Accept: application/json
+
+### TEST 3b.3: GET non-existent Warehouse
+### EXPECTED: 404 Not Found
+GET http://localhost:8080/warehouse/WH-DOES-NOT-EXIST
+Accept: application/json
+
+### ---- TASK 3c: REPLACE Warehouse Tests ----
+
+### TEST 3c.1: REPLACE Warehouse - SUCCESS
+### EXPECTED: 200 OK
+### Increase capacity from 50 to 70 (stock stays same 10)
+POST http://localhost:8080/warehouse/WH-CREATE-001/replacement
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-CREATE-001",
+  "location": "AMSTERDAM-002",
+  "capacity": 70,
+  "stock": 10
+}
+
+### TEST 3c.2: REPLACE Warehouse - Non-existent warehouse
+### EXPECTED: 404 Not Found
+POST http://localhost:8080/warehouse/WH-NOT-FOUND/replacement
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-NOT-FOUND",
+  "location": "AMSTERDAM-002",
+  "capacity": 50,
+  "stock": 10
+}
+
+### TEST 3c.3: REPLACE Warehouse - New capacity < old stock
+### EXPECTED: 400 Bad Request
+### Old warehouse has stock 20, trying capacity 10 (too small)
+POST http://localhost:8080/warehouse/WH-ALL-VALID/replacement
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-ALL-VALID",
+  "location": "EINDHOVEN-001",
+  "capacity": 10,
+  "stock": 20
+}
+
+### TEST 3c.4: REPLACE Warehouse - Stock doesn't match
+### EXPECTED: 400 Bad Request
+### Old warehouse has stock 20, trying new stock 25 (mismatch)
+POST http://localhost:8080/warehouse/WH-ALL-VALID/replacement
+Content-Type: application/json
+
+{
+  "businessUnitCode": "WH-ALL-VALID",
+  "location": "EINDHOVEN-001",
+  "capacity": 70,
+  "stock": 25
+}
+
+### ---- TASK 3d: ARCHIVE Warehouse Tests ----
+
+### TEST 3d.1: ARCHIVE Warehouse - SUCCESS
+### EXPECTED: 204 No Content
+### Sets archivedAt timestamp, warehouse won't appear in LIST
+DELETE http://localhost:8080/warehouse/WH-CREATE-001
+
+### TEST 3d.2: LIST Warehouses after ARCHIVE
+### EXPECTED: 200 OK
+### WH-CREATE-001 should NOT appear (archived)
+GET http://localhost:8080/warehouse
+Accept: application/json
+
+### TEST 3d.3: GET archived Warehouse (by ID)
+### EXPECTED: Should NOT be found (filtered in repository)
+GET http://localhost:8080/warehouse/WH-CREATE-001
+Accept: application/json
+
+### TEST 3d.4: ARCHIVE non-existent Warehouse
+### EXPECTED: 404 Not Found
+DELETE http://localhost:8080/warehouse/WH-ARCHIVE-NOT-FOUND
+
+
+### ============================================
+### REFERENCE: HTTP Status Codes Used
+### ============================================
+### 200 OK              - Request successful, resource returned
+### 201 Created         - Resource created successfully
+### 204 No Content      - Request successful, no content returned
+### 400 Bad Request     - Validation error (invalid data)
+### 404 Not Found       - Resource doesn't exist
+### 409 Conflict        - Business Unit Code already exists
+### 422 Unprocessable   - Invalid request format
+### 500 Server Error    - Internal error
+### ============================================
+
+### Notes:
+### - Each request can be executed by clicking "Send Request" in VS Code
+### - Responses appear in the side panel
+### - Use ### to separate tests and add comments
+### - Modify values as needed for testing

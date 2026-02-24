@@ -14,6 +14,7 @@ public class CreateWarehouseUseCase implements CreateWarehouseOperation {
   private final WarehouseStore warehouseStore;
   private final LocationResolver locationResolver;
 
+  @jakarta.inject.Inject
   public CreateWarehouseUseCase(WarehouseStore warehouseStore, LocationResolver locationResolver) {
     this.warehouseStore = warehouseStore;
     this.locationResolver = locationResolver;

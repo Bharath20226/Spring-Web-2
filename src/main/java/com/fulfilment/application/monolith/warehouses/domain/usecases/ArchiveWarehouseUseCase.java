@@ -12,6 +12,7 @@ public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
 
   private final WarehouseStore warehouseStore;
 
+  @jakarta.inject.Inject
   public ArchiveWarehouseUseCase(WarehouseStore warehouseStore) {
     this.warehouseStore = warehouseStore;
   }

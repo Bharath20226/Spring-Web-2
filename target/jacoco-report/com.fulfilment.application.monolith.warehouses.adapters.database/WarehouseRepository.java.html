@@ -8,56 +8,56 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-<span class="nc" id="L11">public class WarehouseRepository implements WarehouseStore, PanacheRepository&lt;DbWarehouse&gt; {</span>
+<span class="fc" id="L11">public class WarehouseRepository implements WarehouseStore, PanacheRepository&lt;DbWarehouse&gt; {</span>
 
     @Override
     public List&lt;Warehouse&gt; getAll() {
-<span class="nc" id="L15">        return this.listAll().stream()</span>
-<span class="nc bnc" id="L16" title="All 2 branches missed.">                .filter(dw -&gt; dw.archivedAt == null) // Only active warehouses</span>
-<span class="nc" id="L17">                .map(DbWarehouse::toWarehouse)</span>
-<span class="nc" id="L18">                .toList();</span>
+<span class="fc" id="L15">        return this.listAll().stream()</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">                .filter(dw -&gt; dw.archivedAt == null) // Only active warehouses</span>
+<span class="fc" id="L17">                .map(DbWarehouse::toWarehouse)</span>
+<span class="fc" id="L18">                .toList();</span>
     }
 
     @Override
     public void create(Warehouse warehouse) {
-<span class="nc" id="L23">        DbWarehouse dw = fromDomain(warehouse);</span>
-<span class="nc" id="L24">        this.persist(dw);</span>
-<span class="nc" id="L25">    }</span>
+<span class="fc" id="L23">        DbWarehouse dw = fromDomain(warehouse);</span>
+<span class="fc" id="L24">        this.persist(dw);</span>
+<span class="fc" id="L25">    }</span>
 
     @Override
     public void update(Warehouse warehouse) {
-<span class="nc" id="L29">        DbWarehouse existing = this.find(&quot;businessUnitCode&quot;, warehouse.businessUnitCode).firstResult();</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (existing != null) {</span>
-<span class="nc" id="L31">            existing.capacity = warehouse.capacity;</span>
-<span class="nc" id="L32">            existing.stock = warehouse.stock;</span>
-<span class="nc" id="L33">            existing.location = warehouse.location;</span>
-<span class="nc" id="L34">            existing.archivedAt = warehouse.archivedAt;</span>
+<span class="fc" id="L29">        DbWarehouse existing = this.find(&quot;businessUnitCode&quot;, warehouse.businessUnitCode).firstResult();</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (existing != null) {</span>
+<span class="fc" id="L31">            existing.capacity = warehouse.capacity;</span>
+<span class="fc" id="L32">            existing.stock = warehouse.stock;</span>
+<span class="fc" id="L33">            existing.location = warehouse.location;</span>
+<span class="fc" id="L34">            existing.archivedAt = warehouse.archivedAt;</span>
             // Hibernate updates this automatically at end of transaction
         }
-<span class="nc" id="L37">    }</span>
+<span class="fc" id="L37">    }</span>
 
     @Override
     public void remove(Warehouse warehouse) {
-<span class="nc" id="L41">        this.delete(&quot;businessUnitCode&quot;, warehouse.businessUnitCode);</span>
-<span class="nc" id="L42">    }</span>
+<span class="fc" id="L41">        this.delete(&quot;businessUnitCode&quot;, warehouse.businessUnitCode);</span>
+<span class="fc" id="L42">    }</span>
 
     @Override
     public Warehouse findByBusinessUnitCode(String buCode) {
-<span class="nc" id="L46">        return this.find(&quot;businessUnitCode&quot;, buCode)</span>
-<span class="nc" id="L47">                .firstResultOptional()</span>
-<span class="nc" id="L48">                .map(DbWarehouse::toWarehouse)</span>
-<span class="nc" id="L49">                .orElse(null);</span>
+<span class="fc" id="L46">        return this.find(&quot;businessUnitCode&quot;, buCode)</span>
+<span class="fc" id="L47">                .firstResultOptional()</span>
+<span class="fc" id="L48">                .map(DbWarehouse::toWarehouse)</span>
+<span class="fc" id="L49">                .orElse(null);</span>
     }
 
     private DbWarehouse fromDomain(Warehouse w) {
-<span class="nc" id="L53">        DbWarehouse dw = new DbWarehouse();</span>
-<span class="nc" id="L54">        dw.businessUnitCode = w.businessUnitCode;</span>
-<span class="nc" id="L55">        dw.location = w.location;</span>
-<span class="nc" id="L56">        dw.capacity = w.capacity;</span>
-<span class="nc" id="L57">        dw.stock = w.stock;</span>
-<span class="nc" id="L58">        dw.createdAt = w.createdAt;</span>
-<span class="nc" id="L59">        dw.archivedAt = w.archivedAt;</span>
-<span class="nc" id="L60">        return dw;</span>
+<span class="fc" id="L53">        DbWarehouse dw = new DbWarehouse();</span>
+<span class="fc" id="L54">        dw.businessUnitCode = w.businessUnitCode;</span>
+<span class="fc" id="L55">        dw.location = w.location;</span>
+<span class="fc" id="L56">        dw.capacity = w.capacity;</span>
+<span class="fc" id="L57">        dw.stock = w.stock;</span>
+<span class="fc" id="L58">        dw.createdAt = w.createdAt;</span>
+<span class="fc" id="L59">        dw.archivedAt = w.archivedAt;</span>
+<span class="fc" id="L60">        return dw;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

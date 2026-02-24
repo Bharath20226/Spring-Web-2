@@ -2,34 +2,38 @@
 
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
 import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResolver;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
 import java.util.ArrayList;
 import java.util.List;
 
-<span class="nc" id="L8">public class LocationGateway implements LocationResolver {</span>
+@ApplicationScoped
+<span class="nc" id="L12">public class LocationGateway implements LocationResolver {</span>
 
-<span class="nc" id="L10">  private static final List&lt;Location&gt; locations = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L14">  private static final List&lt;Location&gt; locations = new ArrayList&lt;&gt;();</span>
 
   static {
-<span class="nc" id="L13">    locations.add(new Location(&quot;ZWOLLE-001&quot;, 1, 40));</span>
-<span class="nc" id="L14">    locations.add(new Location(&quot;ZWOLLE-002&quot;, 2, 50));</span>
-<span class="nc" id="L15">    locations.add(new Location(&quot;AMSTERDAM-001&quot;, 5, 100));</span>
-<span class="nc" id="L16">    locations.add(new Location(&quot;AMSTERDAM-002&quot;, 3, 75));</span>
-<span class="nc" id="L17">    locations.add(new Location(&quot;TILBURG-001&quot;, 1, 40));</span>
-<span class="nc" id="L18">    locations.add(new Location(&quot;HELMOND-001&quot;, 1, 45));</span>
-<span class="nc" id="L19">    locations.add(new Location(&quot;EINDHOVEN-001&quot;, 2, 70));</span>
-<span class="nc" id="L20">    locations.add(new Location(&quot;VETSBY-001&quot;, 1, 90));</span>
-<span class="nc" id="L21">  }</span>
+<span class="nc" id="L17">    locations.add(new Location(&quot;ZWOLLE-001&quot;, 1, 40));</span>
+<span class="nc" id="L18">    locations.add(new Location(&quot;ZWOLLE-002&quot;, 2, 50));</span>
+<span class="nc" id="L19">    locations.add(new Location(&quot;AMSTERDAM-001&quot;, 5, 100));</span>
+<span class="nc" id="L20">    locations.add(new Location(&quot;AMSTERDAM-002&quot;, 3, 75));</span>
+<span class="nc" id="L21">    locations.add(new Location(&quot;TILBURG-001&quot;, 1, 40));</span>
+<span class="nc" id="L22">    locations.add(new Location(&quot;HELMOND-001&quot;, 1, 45));</span>
+<span class="nc" id="L23">    locations.add(new Location(&quot;EINDHOVEN-001&quot;, 2, 70));</span>
+<span class="nc" id="L24">    locations.add(new Location(&quot;VETSBY-001&quot;, 1, 90));</span>
+<span class="nc" id="L25">  }</span>
 
   @Override
   public Location resolveByIdentifier(String identifier) {
-<span class="nc bnc" id="L25" title="All 2 branches missed.">    if (identifier == null) {</span>
-<span class="nc" id="L26">      return null;</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">    if (identifier == null) {</span>
+<span class="nc" id="L30">      return null;</span>
     }
 
-<span class="nc" id="L29">    return locations.stream()</span>
-<span class="nc" id="L30">        .filter(loc -&gt; identifier.equalsIgnoreCase(loc.identification))</span>
-<span class="nc" id="L31">        .findFirst()</span>
-<span class="nc" id="L32">        .orElse(null); </span>
+<span class="nc" id="L33">    return locations.stream()</span>
+<span class="nc" id="L34">        .filter(loc -&gt; identifier.equalsIgnoreCase(loc.identification))</span>
+<span class="nc" id="L35">        .findFirst()</span>
+<span class="nc" id="L36">        .orElse(null); </span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

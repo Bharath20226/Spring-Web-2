@@ -14,43 +14,44 @@ public class CreateWarehouseUseCase implements CreateWarehouseOperation {
   private final WarehouseStore warehouseStore;
   private final LocationResolver locationResolver;
 
-<span class="nc" id="L17">  public CreateWarehouseUseCase(WarehouseStore warehouseStore, LocationResolver locationResolver) {</span>
-<span class="nc" id="L18">    this.warehouseStore = warehouseStore;</span>
-<span class="nc" id="L19">    this.locationResolver = locationResolver;</span>
-<span class="nc" id="L20">  }</span>
+  @jakarta.inject.Inject
+<span class="nc" id="L18">  public CreateWarehouseUseCase(WarehouseStore warehouseStore, LocationResolver locationResolver) {</span>
+<span class="nc" id="L19">    this.warehouseStore = warehouseStore;</span>
+<span class="nc" id="L20">    this.locationResolver = locationResolver;</span>
+<span class="nc" id="L21">  }</span>
 
   @Override
   public void create(Warehouse warehouse) {
     // 1. Business Unit Code Verification
-<span class="nc bnc" id="L25" title="All 2 branches missed.">    if (warehouseStore.findByBusinessUnitCode(warehouse.businessUnitCode) != null) {</span>
-<span class="nc" id="L26">        throw new WebApplicationException(&quot;Business Unit Code already exists&quot;, 409);</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">    if (warehouseStore.findByBusinessUnitCode(warehouse.businessUnitCode) != null) {</span>
+<span class="nc" id="L27">        throw new WebApplicationException(&quot;Business Unit Code already exists&quot;, 409);</span>
     }
 
     // 2. Location Validation
-<span class="nc" id="L30">    var location = locationResolver.resolveByIdentifier(warehouse.location);</span>
-<span class="nc bnc" id="L31" title="All 2 branches missed.">    if (location == null) {</span>
-<span class="nc" id="L32">        throw new WebApplicationException(&quot;Invalid location&quot;, 400);</span>
+<span class="nc" id="L31">    var location = locationResolver.resolveByIdentifier(warehouse.location);</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    if (location == null) {</span>
+<span class="nc" id="L33">        throw new WebApplicationException(&quot;Invalid location&quot;, 400);</span>
     }
 
     // 3. Feasibility Check (Max warehouses per location)
-<span class="nc" id="L36">    long currentCount = warehouseStore.getAll().stream()</span>
-<span class="nc bnc" id="L37" title="All 4 branches missed.">            .filter(w -&gt; w.location.equals(warehouse.location) &amp;&amp; w.archivedAt == null)</span>
-<span class="nc" id="L38">            .count();</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">    if (currentCount &gt;= location.maxNumberOfWarehouses) {</span>
-<span class="nc" id="L40">        throw new WebApplicationException(&quot;Maximum warehouses reached for this location&quot;, 400);</span>
+<span class="nc" id="L37">    long currentCount = warehouseStore.getAll().stream()</span>
+<span class="nc bnc" id="L38" title="All 4 branches missed.">            .filter(w -&gt; w.location.equals(warehouse.location) &amp;&amp; w.archivedAt == null)</span>
+<span class="nc" id="L39">            .count();</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">    if (currentCount &gt;= location.maxNumberOfWarehouses) {</span>
+<span class="nc" id="L41">        throw new WebApplicationException(&quot;Maximum warehouses reached for this location&quot;, 400);</span>
     }
 
     // 4. Capacity and Stock Validation
-<span class="nc bnc" id="L44" title="All 2 branches missed.">    if (warehouse.capacity &gt; location.maxCapacity) {</span>
-<span class="nc" id="L45">        throw new WebApplicationException(&quot;Capacity exceeds location maximum&quot;, 400);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">    if (warehouse.capacity &gt; location.maxCapacity) {</span>
+<span class="nc" id="L46">        throw new WebApplicationException(&quot;Capacity exceeds location maximum&quot;, 400);</span>
     }
-<span class="nc bnc" id="L47" title="All 2 branches missed.">    if (warehouse.stock &gt; warehouse.capacity) {</span>
-<span class="nc" id="L48">        throw new WebApplicationException(&quot;Stock exceeds capacity&quot;, 400);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">    if (warehouse.stock &gt; warehouse.capacity) {</span>
+<span class="nc" id="L49">        throw new WebApplicationException(&quot;Stock exceeds capacity&quot;, 400);</span>
     }
 
-<span class="nc" id="L51">    warehouse.createdAt = LocalDateTime.now();</span>
-<span class="nc" id="L52">    warehouseStore.create(warehouse);</span>
-<span class="nc" id="L53">  }</span>
+<span class="nc" id="L52">    warehouse.createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L53">    warehouseStore.create(warehouse);</span>
+<span class="nc" id="L54">  }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
